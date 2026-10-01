@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Shrink PDF | Local PDF Compressor</title>
+  <style>
+    :root { font-family: "Yu Gothic", "Hiragino Kaku Gothic ProN", system-ui, sans-serif; color: #182b35; background: #f4f7f7; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; }
+    .shell { max-width: 980px; margin: auto; padding: 28px 24px 72px; }
+    header { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-bottom: 40px; }
+    .brand { font-weight: 800; letter-spacing: -.04em; font-size: 19px; display: flex; align-items: center; gap: 10px; }
+    .brand-icon { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 10px; background: #116b6a; color: white; font-size: 19px; }
+    .private { color: #27645f; font-size: 13px; font-weight: 700; background: #e5f3ed; padding: 8px 12px; border-radius: 50px; }
+    main { display: grid; grid-template-columns: minmax(0,1.1fr) minmax(310px,.9fr); gap: 48px; align-items: start; }
+    .eyebrow { color: #087f77; font-size: 13px; font-weight: 800; letter-spacing: .12em; }
+    h1 { font-size: clamp(34px, 4.7vw, 54px); line-height: 1.2; letter-spacing: -.055em; margin: 16px 0 20px; }
+    .intro { line-height: 1.9; color: #53646d; margin: 0 0 30px; font-size: 16px; }
+    .point { display: flex; gap: 11px; color: #42545a; font-size: 14px; margin: 17px 0; align-items: center; }
+    .check { color: #07877e; background: #def4e9; width: 23px; height: 23px; border-radius: 50%; text-align: center; font-weight: 800; flex: none; }
+    .panel { background: white; border: 1px solid #e2eaea; border-radius: 22px; padding: 27px; box-shadow: 0 24px 60px rgba(20, 67, 69, .08); }
+    .drop { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 176px; border: 2px dashed #a9d2cb; background: #f7fbf9; border-radius: 15px; cursor: pointer; text-align: center; padding: 20px; transition: background .15s, border-color .15s; }
+    .drop:hover, .drop.dragging { background: #ebf8f2; border-color: #07877e; }
+    .drop:focus-visible, button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px solid #83bdf2; outline-offset: 3px; }
+    .upload-icon { display: grid; place-items: center; width: 44px; height: 44px; background: #ddf0e9; color: #08756e; border-radius: 12px; font-size: 24px; margin-bottom: 12px; }
+    .drop strong { font-size: 15px; }
+    .drop small { color: #718188; margin-top: 7px; line-height: 1.5; }
+    #fileInput { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+    .file-info { display: none; margin-top: 14px; padding: 12px 14px; border-radius: 11px; background: #f0f5f5; font-size: 13px; gap: 8px; justify-content: space-between; overflow-wrap: anywhere; }
+    .file-info.visible { display: flex; }
+    .file-info span:last-child { flex: none; color: #65767b; }
+    .field { margin-top: 22px; }
+    label.field-label { display: block; font-weight: 800; font-size: 13px; margin-bottom: 9px; }
+    .field-note { font-size: 12px; color: #75848a; margin: 8px 0 0; line-height: 1.5; }
+    select, input[type=number] { width: 100%; font: inherit; color: #1e343b; background: white; border: 1px solid #ccd9db; border-radius: 10px; padding: 11px 12px; }
+    .target-row { display: grid; grid-template-columns: 1fr 100px; gap: 8px; }
+    .target-row input { display: none; }
+    .target-row.custom input { display: block; }
+    button { font: inherit; cursor: pointer; }
+    .primary { width: 100%; border: 0; border-radius: 11px; background: #087a73; color: white; padding: 14px 18px; font-weight: 800; margin-top: 25px; min-height: 50px; }
+    .primary:hover:not(:disabled) { background: #056860; }
+    .primary:disabled { background: #a9bfbc; cursor: not-allowed; }
+    .secondary { border: 1px solid #bed0d0; background: white; color: #285254; border-radius: 9px; padding: 9px 14px; font-weight: 700; }
+    .secondary:hover { background: #f0f7f5; }
+    .progress-wrap { display: none; margin-top: 22px; }
+    .progress-wrap.visible { display: block; }
+    .progress-head { display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; margin-bottom: 9px; gap: 12px; }
+    .progress-track { width: 100%; height: 8px; border-radius: 9px; background: #e5efec; overflow: hidden; }
+    .progress-bar { background: #10a090; height: 100%; width: 0; transition: width .2s; }
+    .progress-track.indeterminate .progress-bar { width: 35% !important; animation: progress-sweep 1.5s ease-in-out infinite; }
+    @keyframes progress-sweep { from { transform: translateX(-110%); } to { transform: translateX(300%); } }
+    .status { font-size: 13px; line-height: 1.6; margin-top: 13px; color: #586970; }
+    .status.error { color: #a22f2f; }
+    .result { display: none; margin-top: 22px; border-top: 1px solid #e5eceb; padding-top: 19px; }
+    .result.visible { display: block; }
+    .result h2 { font-size: 16px; margin: 0 0 14px; }
+    .metrics { display: flex; align-items: center; gap: 12px; margin-bottom: 15px; }
+    .metric { flex: 1; background: #f1f8f5; padding: 11px; border-radius: 10px; }
+    .metric small { display: block; color: #637a7b; font-size: 11px; }
+    .metric strong { display: block; margin-top: 4px; font-size: 18px; }
+    .arrow { color: #54928b; font-weight: 800; }
+    .result-message { font-size: 13px; line-height: 1.6; color: #40595e; margin: 0 0 12px; }
+    .download { display: inline-block; width: 100%; text-align: center; text-decoration: none; border-radius: 10px; background: #183a3c; color: white; padding: 12px 16px; font-size: 14px; font-weight: 800; }
+    .download:hover { background: #285559; }
+    .preview-button { width: 100%; margin-top: 10px; }
+    .preview-dialog { width: min(1100px, calc(100vw - 24px)); height: min(90vh, 900px); max-width: none; max-height: none; padding: 0; border: 0; border-radius: 14px; box-shadow: 0 24px 80px rgba(0, 0, 0, .28); overflow: hidden; }
+    .preview-dialog[open] { display: flex; flex-direction: column; }
+    .preview-dialog::backdrop { background: rgba(13, 35, 43, .7); }
+    .preview-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 16px; font-weight: 800; }
+    .preview-frame { width: 100%; flex: 1; min-height: 0; border: 0; background: white; }
+    .footnote { max-width: 830px; margin: 45px auto 0; padding-top: 23px; border-top: 1px solid #dce6e5; color: #66777c; font-size: 12px; line-height: 1.8; }
+    @media (max-width: 760px) { .shell { padding: 16px 16px 36px; } header { margin-bottom: 22px; } main { grid-template-columns: 1fr; gap: 20px; } h1 { font-size: 29px; margin: 8px 0 10px; } .intro { margin-bottom: 0; font-size: 14px; line-height: 1.6; } .point, .eyebrow { display: none; } .panel { padding: 18px; } .drop { min-height: 136px; } .field { margin-top: 16px; } .primary { margin-top: 18px; } .footnote { margin-top: 30px; } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header><div class="brand"><span class="brand-icon">↓</span> <span data-i18n="brand">Shrink PDF</span></div><div class="private" data-i18n="private">Processed on your device</div></header>
+    <main>
+      <section>
+        <div class="eyebrow" data-i18n="eyebrow">NO INSTALLATION · LOCAL PROCESSING</div>
+        <h1 data-i18n="heading">Make large PDFs small enough to email.</h1>
+        <p class="intro" data-i18n="intro">Select a file to compress it entirely in your browser. Your PDF is never uploaded. No installation or account is required.</p>
+        <div class="point"><span class="check">✓</span> <span data-i18n="pointOffline">Your PDF is never sent to a server</span></div>
+        <div class="point"><span class="check">✓</span> <span data-i18n="pointPreserve">Option to preserve searchable text and links</span></div>
+        <div class="point"><span class="check">✓</span> <span data-i18n="pointSave">Check the size before saving</span></div>
+      </section>
+      <section class="panel" aria-label="PDF compression" data-i18n-aria-label="panel">
+        <label class="drop" id="dropZone" for="fileInput" tabindex="0" role="button">
+          <span class="upload-icon">↥</span><strong data-i18n="drop">Choose a PDF or drop it here</strong><small data-i18n="oneFile">One file at a time</small>
+        </label>
+        <input type="file" id="fileInput" accept=".pdf,application/pdf">
+        <div class="file-info" id="fileInfo"><span id="fileName"></span><span id="fileSize"></span></div>
+        <div class="field"><label class="field-label" for="mode" data-i18n="mode">Compression method</label><select id="mode"><option value="preserve" data-i18n="preserve">Preserve text and links (recommended)</option><option value="raster" data-i18n="raster">Convert pages to images for stronger compression</option></select><p class="field-note" id="modeNote" data-i18n="preserveNote">Preserves text search and copying, links, forms, and more. The amount saved depends on the PDF.</p></div>
+        <div class="field"><label class="field-label" for="target" data-i18n="target">Target size</label><div class="target-row" id="targetRow"><select id="target"><option value="5" data-i18n="recommended">5 MB (recommended)</option><option value="10">10 MB</option><option value="20">20 MB</option><option value="25">25 MB</option><option value="custom" data-i18n="custom">Custom</option></select><input type="number" id="customTarget" min="1" max="500" step="1" value="5" aria-label="Target size in MB" data-i18n-aria-label="targetAria"></div><p class="field-note" data-i18n="targetNote">Set this a little below your recipient’s attachment limit.</p></div>
+        <div class="field"><label class="field-label" for="quality" data-i18n="quality">Image quality priority</label><select id="quality"><option value="balanced" data-i18n="balanced">Balanced (recommended)</option><option value="quality" data-i18n="qualityHigh">Clear text and photos</option><option value="size" data-i18n="qualitySmall">Smaller file</option></select></div>
+        <button class="primary" id="compress" disabled data-i18n="compress">Compress PDF</button>
+        <div class="progress-wrap" id="progressWrap" aria-live="polite"><div class="progress-head"><span id="progressLabel" data-i18n="preparing">Preparing…</span><span id="progressPercent">0%</span></div><div class="progress-track" role="progressbar" id="progressTrack" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="progress-bar" id="progressBar"></div></div><p class="status" id="status"></p><button type="button" class="secondary" id="cancel" style="display:none" data-i18n="cancel">Cancel</button></div>
+        <div class="result" id="result" aria-live="polite"><h2 data-i18n="result">Compression result</h2><div class="metrics"><div class="metric"><small data-i18n="originalSize">Original size</small><strong id="beforeSize"></strong></div><span class="arrow">→</span><div class="metric"><small data-i18n="compressedSize">Compressed size</small><strong id="afterSize"></strong></div></div><p class="result-message" id="resultMessage"></p><a class="download" id="download" download data-i18n="download">Save compressed PDF</a><button type="button" class="secondary preview-button" id="previewButton" aria-controls="previewDialog" data-i18n="previewShow">Preview compressed PDF</button></div>
+      </section>
+    </main>
+    <div class="footnote" data-i18n="footnote">“Preserve text and links” recompresses PDF contents and interactive elements, but rewriting invalidates digital signatures. “Convert pages to images” removes selectable and searchable text, links, forms, and bookmarks. The original PDF is not changed. Password-protected PDFs are unsupported. Very large PDFs may exceed the memory available on your device.</div>
+  </div>
+  <dialog class="preview-dialog" id="previewDialog" aria-label="Compressed PDF preview" data-i18n-aria-label="previewTitle"><div class="preview-head"><span data-i18n="previewTitle">Compressed PDF preview</span><button type="button" class="secondary" id="previewClose" data-i18n="previewHide">Close preview</button></div><iframe class="preview-frame" id="previewFrame" title="Compressed PDF preview" data-i18n-title="previewTitle"></iframe></dialog>
+  <!-- APP_SCRIPT -->
+</body>
+</html>
