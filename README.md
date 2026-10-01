@@ -2,6 +2,8 @@
 
 A browser-based PDF compressor that runs entirely on your device. Download and open the generated [`index.html`](index.html) in Chrome or Edge, or host it as a static page. No account, installation, server-side processing, or file upload is required. The interface uses Japanese when the browser's primary language is Japanese and English otherwise.
 
+**Try it online:** https://ytmknd.github.io/LocalShrinkPDF/
+
 ## Use
 
 1. Open `index.html` in your browser, or visit the GitHub Pages site.
